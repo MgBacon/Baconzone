@@ -1,14 +1,6 @@
 var router = require('express').Router();
 var pg = require('pg');
-var Pool = pg.Pool;
-var pool =new Pool({
-    user: 'farmbot',
-    password: 'bar',
-    host: 'localhost',
-    database: 'farmbot',
-    max: 10, // max number of clients in pool
-    idleTimeoutMillis: 1000, // close & remove clients which have been idle > 1 second
-});
+
 var connection = require(__dirname +"/../../config").connectionString;
 console.log(connection);
 router.get('/', function(req, res) {
@@ -19,7 +11,8 @@ router.get('/', function(req, res) {
 *
  */
 router.get('/quotes', function(req,res) {
-    var quotes = [];    pg.connect(connection, function(err, client, done) {
+    var quotes = [];
+    pg.connect(connection, function(err, client, done) {
         if(err) {
             done();
             console.log(err);
