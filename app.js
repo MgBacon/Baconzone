@@ -52,5 +52,5 @@ app.use(function (error, req,resp) {
     resp.render("500");
 });
 app.listen(3000,function(){
-    console.log("Express has been started on port"+app.port);
+    console.log("Express has been started.");
 });
