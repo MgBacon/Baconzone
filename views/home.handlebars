@@ -1,0 +1,29 @@
+<div class="page-header">
+    <style>
+        h2 {
+            font-family: Ubuntu;
+            color:#1e90ff;
+        }
+    </style>
+    <center>
+        <h2></h2>
+        <img src="/img/phd_vacation.gif"><br><br><br>
+        <img src="/img/git.png" alt="it's not that hard lol">
+    </center>
+    <script>
+        $.get("/api/v1/quotes/random",function(data,status,xhr){
+            var quotes=data.quotes;
+            var quote=quotes[0];
+            var quoteString=escapeHtml(quote.quote)+" - "+quote.author+" "+quote.year;
+            $('h2').html(quoteString);
+        });
+        function escapeHtml(unsafe) {
+            return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+        }
+    </script>
+</div>

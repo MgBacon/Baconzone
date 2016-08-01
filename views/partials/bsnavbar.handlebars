@@ -1,0 +1,37 @@
+<div class="bsnavbar">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="pull-left"><img src="/img/saber.png" width="50" height="50"></a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="/">Home <span class="sr-only">(current)</span></a></li>
+                    <li><a href="/quotes">Quotes</a></li>
+                    <li><a href="/api">API</a></li>
+                    <li><a href="/about">About</a></li>
+                </ul>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                {{#if user}}
+                    <p class="navbar-text"><strong>Hi,</strong>{{user.username}}</p>
+                </li>
+                    <li>
+                        <a href="/logout">Log Out</a>
+                    </li>
+                {{else}}
+                    <li> <a href="/login">Login</a></li>
+                    <li> <a href="/register">Register</a></li>
+                {{/if}}
+            </ul>
+            </div><!-- /.collapse navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+</div>
