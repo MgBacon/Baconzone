@@ -11,6 +11,7 @@
   "license": "DBAD",
   "dependencies": {
    "bcryptjs": "^0.7.12",
+   "escape-html": "^1.0.3",
    "express": "^4.9.5",
    "express-handlebars": "^1.1.0",
    "body-parser": "^1.9.0",
