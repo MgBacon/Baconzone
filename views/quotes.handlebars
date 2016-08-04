@@ -68,27 +68,13 @@
 </center>
     <script>
         $(document).ready(function(){
-            $.get("/api/v1/quotes/random",function(data,status,xhr){
-                var quotes=data.quotes;
-                var quote=quotes[0];
-                var quoteString=escapeHtml(quote.quote)+" - "+quote.author+" "+quote.year;
-                $('h2').html(quoteString);
-            });
             $.get("/api/v1/quotes",function(data,status,xhr){
                 var quotes=data.quotes;
                 for(var i=0;i<quotes.length;i++){
-                    var row="<tr><td>"+quotes[i].id+"</td><td>"+escapeHtml(quotes[i].quote)+"</td><td>"+quotes[i].author+"</td><td>"+quotes[i].year+"</td></tr>"
+                    var row="<tr><td>"+quotes[i].id+"</td><td>"+quotes[i].quote+"</td><td>"+quotes[i].author+"</td><td>"+quotes[i].year+"</td></tr>"
                     $("#quoteTable").append(row);
                 }
             });
         });
-        function escapeHtml(unsafe) {
-            return unsafe
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-        }
     </script>
 </div>
