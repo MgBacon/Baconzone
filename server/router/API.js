@@ -6,7 +6,6 @@ var escape = require('escape-html');
 var connection = require(__dirname +"/../../config").connectionString;
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
-console.log(connection);
 router.get('/', function(req, res) {
     res.json('API main page, not much to see here');
 });
