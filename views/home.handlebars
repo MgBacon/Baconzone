@@ -6,17 +6,25 @@
         }
     </style>
     <center>
-        <h2></h2>
-        <button type="button" class="btn btn-primary" id="get-random"><img src="/img/reload.svg" width="30" /></button>
+        <h2 id='quote'></h2>
+        <button type="button" class="btn btn-primary" id="get-random" onclick='getRandomQuote()'><img src="/img/reload.svg" width="30" /></button>
         <br>
         <img src="/img/phd_vacation.gif"><br><br><br>
     </center>
     <script>
-        $.get("/api/v1/quotes/random",function(data,status,xhr){
-            var quotes=data.quotes;
-            var quote=quotes[0];
+    document.load=getRandomQuote()
+        function getRandomQuote() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", '/api/v1/quotes/random',false); // false for synchronous request
+            xmlHttp.send();
+            var data = JSON.parse(xmlHttp.responseText);
+            var quote=data.quotes[0];
             var quoteString=quote.quote+" - "+quote.author+" "+quote.year;
-            $('h2').html(quoteString);
-        });
+            if(document.getElementById('quote').innerHTML==quoteString){
+                getRandomQuote();
+                return;
+            }
+            document.getElementById('quote').innerHTML = quoteString;
+        }
     </script>
 </div>
