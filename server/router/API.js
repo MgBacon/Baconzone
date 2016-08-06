@@ -1,10 +1,22 @@
-var router = require('express').Router();
+require('connect-flash');
+var express = require('express');
 var bodyParser=require("body-parser");
 var pg = require('pg');
 var escape = require('escape-html');
 
+var RateLimit = require('express-rate-limit');
+var apiLimiter = new RateLimit({
+    windowMs: 15*60*1000, // 15 minutes 
+    max: 100,
+    delayMs: 0, // disabled
+    statusCode: 429, // 429 status = Too Many Requests (RFC 6585)
+    message: "429 Too many requests, please try again later"
+    //TODO: do proper handler, not direct lib hack
+});
+var router=express();
 var connection = require(__dirname +"/../../config").connectionString;
-router.use(bodyParser.urlencoded({ extended: false }));
+
+router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 router.get('/', function(req, res) {
     res.json('API main page, not much to see here');
@@ -65,7 +77,10 @@ router.get('/quotes/random', function(req,res) {
  *   POST
  *
  */
-router.post('/quotes', function(req,res){
+router.post('/quotes',apiLimiter, function(req,res){
+    if(req.body.quote===undefined || req.body.author===undefined || req.body.year===undefined){
+        return res.status(510).json({ success: false, data: 'Missing parameters, expecting a quote, an author and a year parameter'});
+    }
     var data = {quote: req.body.quote.trim(),author: req.body.author.trim(),year: req.body.year.trim()};
     pg.connect(connection, function(err, client, done) {
         if(err) {
@@ -73,10 +88,26 @@ router.post('/quotes', function(req,res){
             console.log(err);
             return res.status(500).json({ success: false, data: err});
         }
-        console.log(new Date()+': Added quote: '+[data.quote,data.author.trim(),data.year.trim()]);
-        client.query("INSERT INTO quotes(quote, author,year) values($1, $2, $3)", [data.quote, data.author, data.year]);
-        done();
-        return res.status(200).json({ success: true, data: data});
+        var query=client.query("SELECT quote FROM quotes WHERE quote=$1",[data.quote]);
+        query.on('end', function(result) {
+            done();
+            console.log(result.rows.length + ' rows were found');
+            if(result.rows.length>0){
+                return res.status(208).json({success: false, data: 'Quote already exists!'})
+            }else {
+                client.query("INSERT INTO quotes(quote, author,year) values($1, $2, $3)", [data.quote, data.author, data.year]);
+                done();
+                console.log(new Date() + ': Added quote: ' + data.quote - data.author + data.year);
+                return res.status(200).json({
+                    success: true, data: {
+                        quote: data.quote,
+                        author: data.author,
+                        year: data.year
+                    }
+                });
+            }
+        });
     });
 });
+
 module.exports = router;
