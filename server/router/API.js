@@ -80,7 +80,7 @@ router.post('/quotes',apiLimiter, function(req,res){
     var author=req.body.author;
     var year=req.body.year;
     if((quote===undefined||quote==="") || (author===undefined||author==="") || (year===undefined||year==="")){
-        return res.status(510).json({ success: false, data: 'Missing parameters, expecting a quote, an author and a year parameter'});
+        return res.status(510).json({ success: false, data: 'Missing parameters: Expecting a quote, an author and a year parameter'});
     }
     var data = {quote: quote.trim(),author: author.trim(),year: year.trim()};
     pg.connect(connection, function(err, client, done) {
