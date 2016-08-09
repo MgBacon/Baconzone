@@ -7,7 +7,7 @@ var escape = require('escape-html');
 var RateLimit = require('express-rate-limit');
 var apiLimiter = new RateLimit({
     windowMs: 15*60*1000, // 15 minutes 
-    max: 100,
+    max: 0,
     delayMs: 0, // disabled
     statusCode: 429, // 429 status = Too Many Requests (RFC 6585)
     message: "429 Too many requests, please try again later"
@@ -39,7 +39,6 @@ router.get('/quotes', function(req,res) {
             }
         });
         query.on('row', function(row) {
-            row.quote=escape(row.quote);
             quotes.push(row);
         });
         query.on('end', function() {
@@ -63,7 +62,6 @@ router.get('/quotes/random', function(req,res) {
             }
         });
         query.on('row', function(row) {
-            row.quote=escape(row.quote);
             quotes.push(row);
         });
         query.on('end', function() {
@@ -78,10 +76,13 @@ router.get('/quotes/random', function(req,res) {
  *
  */
 router.post('/quotes',apiLimiter, function(req,res){
-    if(req.body.quote===undefined || req.body.author===undefined || req.body.year===undefined){
+    var quote=req.body.quote;
+    var author=req.body.author;
+    var year=req.body.year;
+    if((quote===undefined||quote==="") || (author===undefined||author==="") || (year===undefined||year==="")){
         return res.status(510).json({ success: false, data: 'Missing parameters, expecting a quote, an author and a year parameter'});
     }
-    var data = {quote: req.body.quote.trim(),author: req.body.author.trim(),year: req.body.year.trim()};
+    var data = {quote: quote.trim(),author: author.trim(),year: year.trim()};
     pg.connect(connection, function(err, client, done) {
         if(err) {
             done();
