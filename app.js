@@ -31,14 +31,6 @@ app.get('/about', function (req, res) {
     res.render('about');
 });
 
-app.get('/login', function (req, res) {
-    res.render('login');
-});
-
-app.get('/register', function (req, res) {
-    res.render('register');
-});
-
 app.get('/api', function (req, res) {
     res.render('api');
 });

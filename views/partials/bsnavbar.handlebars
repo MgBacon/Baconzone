@@ -21,19 +21,7 @@
                     <li><a href="/about">About</a></li>
                 </ul>
             <!-- Collect the nav links, forms, and other content for toggling -->
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                {{#if user}}
-                    <p class="navbar-text"><strong>Hi,</strong>{{user.username}}</p>
-                </li>
-                    <li>
-                        <a href="/logout">Log Out</a>
-                    </li>
-                {{else}}
-                    <li> <a href="/login">Login</a></li>
-                    <li> <a href="/register">Register</a></li>
-                {{/if}}
-            </ul>
+
             </div><!-- /.collapse navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
