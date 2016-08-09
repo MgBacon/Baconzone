@@ -44,12 +44,6 @@
     <script src="http://code.jquery.com/jquery-latest.min.js"    type="text/javascript"></script>
 <!-- Insertion point for handlebars template -->
 <center>
-{{#if info}}
-        <div class="alert success">{{info}}</div>
-{{/if}}
-{{#if error}}
-        <div class="alert alert-danger">{{error}}</div>
-{{/if}}
         <form class="form-inline" action="#" method="post" id="quoteAdd">        <!--onSubmit="window.open('/quotes')"-->
             <input class="form-control" type="text" placeholder="Quote" name="quote" required>
             <input class="form-control" type="text" placeholder="Author" name="author" required>
@@ -70,6 +64,7 @@
 
 </table>
 </center>
+<script src="/js/alert.js"></script>
     <script>
         $(document).ready(getAllQuotes());
 
@@ -111,11 +106,25 @@
                     var data = JSON.parse(http.responseText);
                     console.log(data)
                     if(data.success){
-                       alert("Quote added successfully!");
+                        $.alert('Quote added successfully',{
+                            autoClose: true,
+                            closeTime: 2000,
+                            type:'success',
+                            position: ['center', [-250,0]],
+                            close:""
+                        });
+
                         clearTable();
                         getAllQuotes();
                     }else{
-                        alert("Error: "+data.data)
+                        $.alert(data.data,{
+                            autoClose: true,
+                            closeTime: 4000,
+                            type:'danger',
+                            position: ['center', [-250,0]],
+                            close:""
+                        });
+                        //alert("Error: "+data.data)
                     }
                 }
             }
