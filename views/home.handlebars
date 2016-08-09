@@ -19,12 +19,20 @@
             xmlHttp.send();
             var data = JSON.parse(xmlHttp.responseText);
             var quote=data.quotes[0];
-            var quoteString=quote.quote+" - "+quote.author+" "+quote.year;
+            var quoteString=escapeHtml(quote.quote)+" - "+escapeHtml(quote.author)+" "+escapeHtml(quote.year);
             if(document.getElementById('quote').innerHTML==quoteString){
                 getRandomQuote();
                 return;
             }
             document.getElementById('quote').innerHTML = quoteString;
         }
+    function escapeHtml(unsafe) {
+        return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+    }
     </script>
 </div>
