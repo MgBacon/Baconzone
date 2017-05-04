@@ -1,17 +1,14 @@
-require('connect-flash');
 var express = require('express');
 var bodyParser=require("body-parser");
 var pg = require('pg');
-var escape = require('escape-html');
 
 var RateLimit = require('express-rate-limit');
 var apiLimiter = new RateLimit({
     windowMs: 15*60*1000, // 15 minutes 
-    max: 0,
+    max: 100,
     delayMs: 0, // disabled
     statusCode: 429, // 429 status = Too Many Requests (RFC 6585)
     message: "429 Too many requests, please try again later"
-    //TODO: do proper handler, not direct lib hack
 });
 var router=express();
 var connection = require(__dirname +"/../../config").connectionString;
@@ -33,7 +30,7 @@ router.get('/quotes', function(req,res) {
             console.log(err);
             return res.status(500).json({ success: false, data: err});
         }
-        var query=client.query('SELECT * FROM quotes ORDER BY id ASC;', function(err, result) {
+        var query=client.query('SELECT * FROM quotes ORDER BY id ASC, date ASC;', function(err, result) {
             if(err){
                 return res.status(500).json({ success: false, data: err});
             }
@@ -96,7 +93,7 @@ router.post('/quotes',apiLimiter, function(req,res){
             if(result.rows.length>0){
                 return res.status(208).json({success: false, data: 'Quote already exists!'})
             }else {
-                client.query("INSERT INTO quotes(quote, author,year) values($1, $2, $3)", [data.quote, data.author, data.year]);
+                client.query("INSERT INTO quotes(quote, author,year,date) values($1, $2, $3, $4)", [data.quote, data.author, data.year,new Date()]);
                 done();
                 console.log(new Date() + ': Added quote: ' + data.quote - data.author + data.year);
                 return res.status(200).json({
