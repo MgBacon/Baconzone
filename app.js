@@ -3,9 +3,9 @@ var exphbs=require('express-handlebars');
 var morgan=require('morgan');
 var database=require('./server/router/API');
 var auth=require('./server/router/Auth');
-var fs = require('fs');
-
+var fs=require('fs');
 var app=express();
+
 app.disable("x-powered-by");
 app.use(express.static(__dirname + '/public'));
 
@@ -37,6 +37,10 @@ app.get('/api', function (req, res) {
 app.get('/quotes', function (req, res) {
     res.render('quotes');
 });
+
+app.get('/farmbot', function (req, res) {
+    res.render('farmbot');
+})
 
 app.use(function (req,resp) {
     resp.type("text/html");
