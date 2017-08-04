@@ -1,6 +1,10 @@
+require('dotenv').config();
 var express = require('express');
 var bodyParser=require("body-parser");
-var pg = require('pg');
+const { Pool } = require('pg')
+const pool = new Pool({
+    connectionString: process.env.DB_URL
+})
 
 var RateLimit = require('express-rate-limit');
 var apiLimiter = new RateLimit({
@@ -10,91 +14,63 @@ var apiLimiter = new RateLimit({
     statusCode: 429, // 429 status = Too Many Requests (RFC 6585)
     message: "429 Too many requests, please try again later"
 });
-var router=express();
-var connection = require(__dirname +"/../../config").connectionString;
 
+var router=express();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 router.get('/', function(req, res) {
     res.json('API main page, not much to see here');
 });
+//TODO: use clients to pool from main pool
 /**
 *   GET
 *
- */
+*/
 router.get('/quotes', function(req,res) {
     var quotes = [];
-    pg.connect(connection, function(err, client, done) {
-        if(err) {
-            done();
-            console.log(err);
+    pool.query('SELECT * FROM quotes ORDER BY id ASC', (err, result) => {
+        if(err){
             return res.status(500).json({ success: false, data: err});
-        }
-        var query=client.query('SELECT * FROM quotes ORDER BY id ASC, date ASC;', function(err, result) {
-            if(err){
-                return res.status(500).json({ success: false, data: err});
-            }
-        });
-        query.on('row', function(row) {
-            quotes.push(row);
-        });
-        query.on('end', function() {
-            done();
+        }else{
+            result.rows.forEach(function(element) {
+                quotes.push(element)
+            }, this);
             return res.status(200).json({quotes: quotes});
-        });
+        }
     });
+        
 });
 //get random quote
 router.get('/quotes/random', function(req,res) {
     var quotes = [];
-    pg.connect(connection, function(err, client, done) {
-        if(err) {
-            done();
-            console.log(err);
+    pool.query('SELECT * FROM quotes ORDER BY random() LIMIT 1', (err, result) =>  {
+        if(err){
             return res.status(500).json({ success: false, data: err});
-        }
-        var query=client.query('SELECT * FROM quotes ORDER BY random() LIMIT 1;', function(err, result) {
-            if(err){
-                return res.status(500).json({ success: false, data: err});
-            }
-        });
-        query.on('row', function(row) {
-            quotes.push(row);
-        });
-        query.on('end', function() {
-            done();
+        }else{
+            quotes.push(result.rows[0]);
             return res.status(200).json({quotes: quotes});
-        });
+        }
     });
 });
 
 /**
  *   POST
  *
- */
-router.post('/quotes',apiLimiter, function(req,res){
+*/
+router.post('/quotes',apiLimiter, (req,res) =>{
     var quote=req.body.quote;
     var author=req.body.author;
     var year=req.body.year;
-    if((quote===undefined||quote==="") || (author===undefined||author==="") || (year===undefined||year==="")){
+    if(!validParameter(quote) || !validParameter(author) || !validParameter(year)){
         return res.status(510).json({ success: false, data: 'Missing parameters: Expecting a quote, an author and a year parameter'});
     }
     var data = {quote: quote.trim(),author: author.trim(),year: year.trim()};
-    pg.connect(connection, function(err, client, done) {
-        if(err) {
-            done();
-            console.log(err);
-            return res.status(500).json({ success: false, data: err});
-        }
-        var query=client.query("SELECT quote FROM quotes WHERE quote=$1",[data.quote]);
-        query.on('end', function(result) {
-            done();
-            console.log(result.rows.length + ' rows were found');
+    pool.query("SELECT quote FROM quotes WHERE quote=$1",[data.quote]), (result) => {
+            console.log(res.rows.length + ' rows were found');
             if(result.rows.length>0){
                 return res.status(208).json({success: false, data: 'Quote already exists!'})
             }else {
                 client.query("INSERT INTO quotes(quote, author,year,date) values($1, $2, $3, $4)", [data.quote, data.author, data.year,new Date()]);
-                done();
                 console.log(new Date() + ': Added quote: ' + data.quote - data.author + data.year);
                 return res.status(200).json({
                     success: true, data: {
@@ -104,8 +80,14 @@ router.post('/quotes',apiLimiter, function(req,res){
                     }
                 });
             }
-        });
-    });
-});
+        }
+})
 
+function validParameter(parameter){
+    if(parameter===""|| parameter===null || parameter ===NaN){
+        return false;
+    }else{
+        return true;
+    }
+}
 module.exports = router;

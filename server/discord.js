@@ -1,3 +1,4 @@
+require('dotenv').config();
 var Discord = require("discord.js");
 var client = new Discord.Client();
 
@@ -10,5 +11,6 @@ client.on('message', msg => {
         msg.reply('Pong!');
     }
 });
+client.login(process.env.DISCORD_TOKEN);
 
-client.login(token);
+module.exports=client;
