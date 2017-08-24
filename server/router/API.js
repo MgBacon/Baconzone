@@ -62,11 +62,38 @@ router.post('/quotes',apiLimiter, (req,res) =>{
     var author=req.body.author;
     var year=req.body.year;
     if(!validParameter(quote) || !validParameter(author) || !validParameter(year)){
-        return res.status(510).json({ success: false, data: 'Missing parameters: Expecting a quote, an author and a year parameter'});
+        return res.status(400).json({ success: false, data: 'Missing parameters: Expecting a quote, an author and a year parameter'});
     }
     var data = {quote: quote.trim(),author: author.trim(),year: year.trim()};
-    pool.query("SELECT quote FROM quotes WHERE quote=$1",[data.quote]), (result) => {
-            console.log(res.rows.length + ' rows were found');
+    console.log(data);
+    pool.query("SELECT quote FROM quotes WHERE quote=$1",[data.quote], (err,result) => {
+            console.log(result.rows.length + ' rows were found');
+            if(err){
+                console.log(err);
+                return res.status(500).json({sucess: false, data: err})
+            }else{
+                if(result.rows.length>0){
+                return res.status(208).json({success: false, data: 'Quote already exists!'})
+                }else {
+                pool.query("INSERT INTO quotes(quote, author,year,date) values($1, $2, $3, $4)", [data.quote, data.author, data.year,new Date()]);
+                console.log(new Date() + ': Added quote: ' + data.quote - data.author + data.year);
+                    return res.status(200).json({
+                        success: true, data: {
+                            quote: data.quote,
+                            author: data.author,
+                            year: data.year
+                        }
+                    });
+                }
+            }
+    })
+});
+module.exports = router;
+//Subs
+/*
+function getSubs(){
+    pool.query("SELECT discordchannel,youtubechannel FROM subs",[data.quote]), (result) => {
+            console.log(result.rows.length + ' rows were found');
             if(result.rows.length>0){
                 return res.status(208).json({success: false, data: 'Quote already exists!'})
             }else {
@@ -80,14 +107,19 @@ router.post('/quotes',apiLimiter, (req,res) =>{
                     }
                 });
             }
-        }
-})
+    }
+}
+function getSubForYoutubeChannel(youtubeChannelID){
 
+}
+function getSubsForYoutubeChannel(discordChannelID){
+    
+}
+*/
 function validParameter(parameter){
-    if(parameter===""|| parameter===null || parameter ===NaN){
+    if(parameter===""|| parameter===null || parameter ===NaN || parameter===undefined){
         return false;
     }else{
         return true;
     }
 }
-module.exports = router;

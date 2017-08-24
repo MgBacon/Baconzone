@@ -6,7 +6,7 @@ var exphbs=require('express-handlebars');
 var morgan=require('morgan');
 var database=require('./server/router/API');
 var auth=require('./server/router/Auth');
-
+var discord=require('./server/discord');
 
 app.disable("x-powered-by");
 app.use(express.static(__dirname + '/public'));
@@ -22,7 +22,7 @@ app.use(morgan('dev'));
 
 //set up APIs
 app.use('/api/v1',database);
-app.use('/auth/',auth);
+//app.use('/auth/',auth);
 
 
 app.get('/', function (req, res) {
@@ -61,7 +61,7 @@ var scopes = ['identify', /* 'connections', (it is currently broken) */ 'guilds'
 
 passport.use(new Strategy({
     clientID: process.env.DISCORD_CLIENTID,
-    clientSecret: process.env.clientSecret,
+    clientSecret: process.env.DISCORD_SECRET,
     callbackURL: 'http://localhost:3000/callback',
     scope: scopes
 }, function(accessToken, refreshToken, profile, done) {
@@ -86,8 +86,15 @@ app.get('/logout', function(req, res) {
     res.redirect('/');
 });
 app.get('/info', checkAuth, function(req, res) {
-    //console.log(req.user)
-    res.json(req.user);
+    var user=req.user;
+    console.log(user);
+    res.json(user);
+    for(var i=0;i<user.guilds.length;i++){
+        var guild=user.guilds[i];
+        console.log(guild.id);
+        console.log("https://cdn.discordapp.com/icons/"+guild.id+"/"+guild.icon);
+        //discord.
+    }
 });
 
 
